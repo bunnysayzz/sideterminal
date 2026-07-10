@@ -54,21 +54,41 @@
       34%, 76% { transform: translateX(0); opacity: 1; }
       86%, 100%{ transform: translateX(330px); opacity: 0; }
     }
-    .l1 { animation: appear 14s infinite; }
-    .l2 { animation: appear 14s infinite; animation-delay: .9s; }
-    .l3 { animation: appear 14s infinite; animation-delay: 2.1s; }
-    .l4 { animation: appear 14s infinite; animation-delay: 3s; }
-    .l5 { animation: appear 14s infinite; animation-delay: 3.6s; }
-    @keyframes appear {
-      0%, 38% { opacity: 0; } 40%, 100% { opacity: 1; }
+    /* Prompts and outputs appear at their moment; commands TYPE in. */
+    .p1 { animation: show36 14s steps(1) infinite; }
+    .o2 { animation: show44 14s steps(1) infinite; }
+    .p3 { animation: show47 14s steps(1) infinite; }
+    .o4 { animation: show57 14s steps(1) infinite; }
+    .p5 { animation: show61 14s steps(1) infinite; }
+    @keyframes show36 { 0%, 36% { opacity: 0; } 36.1%, 100% { opacity: 1; } }
+    @keyframes show44 { 0%, 44% { opacity: 0; } 44.1%, 100% { opacity: 1; } }
+    @keyframes show47 { 0%, 47% { opacity: 0; } 47.1%, 100% { opacity: 1; } }
+    @keyframes show57 { 0%, 57% { opacity: 0; } 57.1%, 100% { opacity: 1; } }
+    @keyframes show61 { 0%, 61% { opacity: 0; } 61.1%, 100% { opacity: 1; } }
+    /* Typewriter: reveal the command left-to-right in character chunks. */
+    .t1 {
+      clip-path: inset(0 100% 0 0);
+      animation: type1 14s steps(6, end) infinite;
+    }
+    @keyframes type1 {
+      0%, 37%   { clip-path: inset(0 100% 0 0); }
+      42%, 100% { clip-path: inset(0 0 0 0); }
+    }
+    .t3 {
+      clip-path: inset(0 100% 0 0);
+      animation: type3 14s steps(13, end) infinite;
+    }
+    @keyframes type3 {
+      0%, 48%   { clip-path: inset(0 100% 0 0); }
+      55%, 100% { clip-path: inset(0 0 0 0); }
     }
     .caret { animation: blink 1s steps(1) infinite; }
     @keyframes blink { 50% { opacity: 0; } }
-    .cap { animation: caps 14s steps(1) infinite; }
     @media (prefers-reduced-motion: reduce) {
-      .cursor, .edge, .term, .l1, .l2, .l3, .l4, .l5 { animation: none; }
+      .cursor, .edge, .term, .p1, .o2, .p3, .o4, .p5, .t1, .t3 { animation: none; }
       .term { transform: none; opacity: 1; }
-      .l1,.l2,.l3,.l4,.l5 { opacity: 1; }
+      .p1,.o2,.p3,.o4,.p5 { opacity: 1; }
+      .t1,.t3 { clip-path: none; }
     }
   </style>
 
@@ -159,14 +179,23 @@
         <circle cx="370" cy="66" r="4" fill="#4fd6c8"/>
         <text x="382" y="69.5" class="mono" font-size="8.5" fill="#63636f" letter-spacing=".4">sideterminal — zsh</text>
         <line x1="352" y1="80" x2="638" y2="80" stroke="#ffffff" stroke-opacity=".07"/>
-        <g class="mono" font-size="10.5" fill="#cdd3d0">
-          <text class="l1" x="368" y="104"><tspan fill="#4fd6c8" font-weight="700">➜</tspan>&#160;<tspan fill="#b8a2f2">~/project</tspan>&#160;claude</text>
-          <text class="l2" x="368" y="126" fill="#8b93a5">✳ Welcome back — session restored.</text>
-          <text class="l3" x="368" y="148"><tspan fill="#4fd6c8" font-weight="700">➜</tspan>&#160;<tspan fill="#b8a2f2">~/project</tspan>&#160;npm run build</text>
-          <text class="l4" x="368" y="170" fill="#7ee2a0">✓ built in 1.24s — still running while hidden</text>
-          <text class="l5" x="368" y="192"><tspan fill="#4fd6c8" font-weight="700">➜</tspan>&#160;<tspan fill="#b8a2f2">~/project</tspan></text>
+        <clipPath id="termClip"><rect x="364" y="84" width="264" height="308"/></clipPath>
+        <g class="mono" font-size="10" fill="#cdd3d0" clip-path="url(#termClip)">
+          <g class="p1">
+            <text x="368" y="104"><tspan fill="#4fd6c8" font-weight="700">➜</tspan>&#160;<tspan fill="#b8a2f2">~/project</tspan></text>
+            <text class="t1" x="440" y="104">claude</text>
+          </g>
+          <text class="o2" x="368" y="126" fill="#8b93a5">✳ Welcome back — session restored.</text>
+          <g class="p3">
+            <text x="368" y="148"><tspan fill="#4fd6c8" font-weight="700">➜</tspan>&#160;<tspan fill="#b8a2f2">~/project</tspan></text>
+            <text class="t3" x="440" y="148">npm run build</text>
+          </g>
+          <text class="o4" x="368" y="170" fill="#7ee2a0">✓ built in 1.24s — still running</text>
+          <g class="p5">
+            <text x="368" y="192"><tspan fill="#4fd6c8" font-weight="700">➜</tspan>&#160;<tspan fill="#b8a2f2">~/project</tspan></text>
+            <rect class="caret" x="442" y="183" width="6.5" height="12" fill="#4fd6c8"/>
+          </g>
         </g>
-        <rect class="caret" x="440" y="183" width="7" height="12" fill="#4fd6c8"/>
       </g>
     </g>
 
