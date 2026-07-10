@@ -71,12 +71,28 @@ scripts/bundle-app.sh release  # -> build/SideTerminal.app
   com.sideterminal.control.set   object "theme=dark" | "edge=left" | "width=600"
   ```
 
+## Releasing
+
+The app must be built on macOS 26 (its UI uses the latest SDK), so releases are
+cut from a maintainer's Mac, not CI. One command tests, builds, packages, and
+publishes:
+
+```bash
+scripts/release.sh v1.2.0
+```
+
+It refuses to run unless the unit tests are green in CI for the current commit,
+then builds the app + DMG and creates a GitHub Release whose notes are generated
+automatically from the commits and merged PRs since the last release (grouped by
+label per [`.github/release.yml`](.github/release.yml)).
+
 ## Contributing
 
 Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). In short:
 the terminal engine is off-limits (that's the whole point of wrapping a great
 one); SideTerminal owns the sidebar experience around it. Pure logic lives in
-[`app/Core`](app/Core) and is unit-tested.
+[`app/Core`](app/Core) and is unit-tested. Pull requests are automatically
+checked (build, tests, security, lint, hygiene) and reviewed by CodeRabbit.
 
 ## License
 

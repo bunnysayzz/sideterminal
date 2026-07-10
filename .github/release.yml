@@ -1,0 +1,26 @@
+# Categorizes GitHub's auto-generated release notes by PR label.
+# Used by `gh release create --generate-notes` and the Release workflow.
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - dependabot
+  categories:
+    - title: ✨ Features
+      labels:
+        - enhancement
+        - feature
+    - title: 🐛 Fixes
+      labels:
+        - bug
+        - fix
+    - title: 🧹 Maintenance
+      labels:
+        - chore
+        - refactor
+        - ci
+        - documentation
+    - title: Other Changes
+      labels:
+        - "*"

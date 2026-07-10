@@ -44,7 +44,11 @@ if [ -f "$ROOT/assets/GitHubMark.png" ]; then
     cp "$ROOT/assets/GitHubMark.png" "$APP/Contents/Resources/"
 fi
 
-cat > "$APP/Contents/Info.plist" <<'PLIST'
+# Version is stamped from the environment during a release; defaults keep
+# local dev builds working (scripts/release.sh sets these from the tag).
+APP_VERSION="${SIDETERMINAL_VERSION:-1.0.0}"
+APP_BUILD="${SIDETERMINAL_BUILD:-1}"
+cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -56,8 +60,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <key>CFBundleName</key><string>SideTerminal</string>
     <key>CFBundleDisplayName</key><string>SideTerminal</string>
     <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>1.0.0</string>
-    <key>CFBundleVersion</key><string>1</string>
+    <key>CFBundleShortVersionString</key><string>${APP_VERSION}</string>
+    <key>CFBundleVersion</key><string>${APP_BUILD}</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>LSUIElement</key><true/>
