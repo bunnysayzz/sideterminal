@@ -43,9 +43,20 @@
 
 ## Install
 
-Download the latest `SideTerminal.app` from the
-[Releases](https://github.com/bunnysayzz/sideterminal/releases) page, or build
-from source below.
+1. Download `SideTerminal.dmg` from the
+   [Releases](https://github.com/bunnysayzz/sideterminal/releases) page, open it,
+   and drag **SideTerminal** into **Applications**.
+2. SideTerminal is open source and unsigned (no paid Apple Developer account),
+   so macOS Gatekeeper blocks it on first launch. Allow it once with:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/SideTerminal.app
+   ```
+
+   Then open it normally. (Alternatively: **System Settings → Privacy &
+   Security → Open Anyway**.)
+
+Requires macOS 14+ on Apple Silicon. Or build from source below.
 
 ## Build from source
 
