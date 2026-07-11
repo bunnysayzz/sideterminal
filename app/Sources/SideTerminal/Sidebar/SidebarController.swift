@@ -100,13 +100,16 @@ final class SidebarController: NSObject {
             return self.panel.frame.width - 2 * self.margin
         }
 
-        // Fallback drop target: files dropped anywhere on the card insert
-        // their escaped path in the terminal, like Terminal.app.
-        card.onDropText = { [weak self] text in
-            self?.surface?.insertText(
-                text,
-                replacementRange: NSRange(location: 0, length: 0)
-            )
+        // Folder/file drops: a folder cd's the terminal into it; a file (or
+        // anything else) inserts its escaped path at the prompt.
+        card.onDrop = { [weak self] drop in
+            guard let self, let surface = self.surface else { return }
+            switch drop {
+            case .changeDirectory(let path):
+                surface.insertText("cd \(path)\n", replacementRange: NSRange(location: 0, length: 0))
+            case .insert(let text):
+                surface.insertText(text, replacementRange: NSRange(location: 0, length: 0))
+            }
         }
 
         settingsButton.image = NSImage(
@@ -188,6 +191,10 @@ final class SidebarController: NSObject {
         surface?.removeFromSuperview()
         surface = view
         card.embedTerminal(view)
+
+        // The surface would otherwise claim drops itself (inserting the path);
+        // let them fall through to the card so a folder drop cd's into it.
+        view.unregisterDraggedTypes()
 
         // Remember the shell's working directory as it changes (shell
         // integration reports it) so the next session can restore it.

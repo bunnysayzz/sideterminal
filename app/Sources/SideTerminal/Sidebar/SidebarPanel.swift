@@ -66,9 +66,14 @@ final class SidebarCardView: NSView {
     let contentContainer = NSView()
     let effectView = NSVisualEffectView()
 
-    /// Fallback drop target: anything dropped on the card that the terminal
-    /// view didn't claim (files → escaped paths, plain text) lands here.
-    var onDropText: ((String) -> Void)?
+    /// A drop resolved into intent. Directories become a `cd`, files/text
+    /// become an inserted path, so the terminal behaves like Terminal.app's
+    /// "open at folder".
+    enum Drop {
+        case changeDirectory(String)  // escaped directory path
+        case insert(String)           // escaped text/path
+    }
+    var onDrop: ((Drop) -> Void)?
 
     private let cornerRadius: CGFloat = 16
 
@@ -124,9 +129,22 @@ final class SidebarCardView: NSView {
     }
 
     override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
-        guard let content = sender.draggingPasteboard.getOpinionatedStringContents()
-        else { return false }
-        onDropText?(content)
+        let pb = sender.draggingPasteboard
+
+        // A single folder → cd into it (Terminal.app "open at folder").
+        if let urls = pb.readObjects(forClasses: [NSURL.self]) as? [URL],
+           urls.count == 1, let url = urls.first, url.isFileURL {
+            var isDir: ObjCBool = false
+            if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) {
+                let escaped = Ghostty.Shell.escape(url.path)
+                onDrop?(isDir.boolValue ? .changeDirectory(escaped) : .insert(escaped))
+                return true
+            }
+        }
+
+        // Anything else (multiple items, plain text) → insert as-is.
+        guard let content = pb.getOpinionatedStringContents() else { return false }
+        onDrop?(.insert(content))
         return true
     }
 
