@@ -380,10 +380,11 @@ final class SidebarController: NSObject {
     }
 
     private func applyPanelLevel() {
-        // "Always on top" means above *everything* — fullscreen apps,
-        // floating windows, all of it. Off still floats above normal
-        // windows; a hidden-behind-things overlay is useless.
-        panel.level = settings.alwaysOnTop ? .screenSaver : .floating
+        // "Always on top" means above fullscreen apps and floating windows.
+        // .popUpMenu (101) achieves that while staying BELOW the system's
+        // drag layer (~500) — .screenSaver (1000) sat above it, which broke
+        // drag-and-drop onto the terminal entirely.
+        panel.level = settings.alwaysOnTop ? .popUpMenu : .floating
     }
 
     /// Glass pipeline, mirroring Ghostty's own quick terminal: when the
@@ -460,6 +461,11 @@ final class SidebarController: NSObject {
 
         state = .revealing
         UserDefaults.standard.set(true, forKey: "internal.wasVisible")
+        // Activate so the panel becomes the real OS key window: without this,
+        // a non-activating panel is only "key within our app," so keyboard
+        // focus stays on whatever app you were in — you'd have to click once
+        // to type, and special keys (Esc) wouldn't reach the terminal.
+        NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
         panel.orderFrontRegardless()
         applyGlass()
@@ -617,6 +623,13 @@ final class SidebarController: NSObject {
     private func focusTerminal() {
         guard let surface else { return }
         panel.makeFirstResponder(surface)
+        // Tell the engine the surface is focused so the cursor is solid and
+        // input is live immediately — makeFirstResponder alone doesn't fire
+        // the window-key notification the surface listens for when the panel
+        // is non-activating.
+        if let handle = surface.surface {
+            ghostty_surface_set_focus(handle, true)
+        }
     }
 
     // MARK: Settings
@@ -653,6 +666,41 @@ final class SidebarController: NSObject {
 
     func persistState() {
         UserDefaults.standard.set(state == .shown, forKey: "internal.wasVisible")
+    }
+
+    // MARK: Scripted-test hooks (control channel)
+
+    /// Insert text into the live surface exactly as a paste would.
+    func typeText(_ text: String) {
+        surface?.insertText(text, replacementRange: NSRange(location: 0, length: 0))
+    }
+
+    /// Synthesize a real key press through the panel's responder chain, so
+    /// scripted tests exercise the same path physical keys take.
+    func sendKey(_ name: String) {
+        let map: [String: (code: UInt16, chars: String, raw: String, flags: NSEvent.ModifierFlags)] = [
+            "escape": (53, "\u{1b}", "\u{1b}", []),
+            "return": (36, "\r", "\r", []),
+            "tab":    (48, "\t", "\t", []),
+            "ctrl-c": (8,  "\u{03}", "c", [.control]),
+        ]
+        guard let k = map[name] else { return }
+        for type in [NSEvent.EventType.keyDown, .keyUp] {
+            if let ev = NSEvent.keyEvent(
+                with: type, location: .zero, modifierFlags: k.flags,
+                timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: panel.windowNumber, context: nil,
+                characters: k.chars, charactersIgnoringModifiers: k.raw,
+                isARepeat: false, keyCode: k.code
+            ) {
+                panel.sendEvent(ev)
+            }
+        }
+    }
+
+    /// The visible terminal contents (via the surface's accessibility value).
+    func screenText() -> String {
+        (surface?.accessibilityValue() as? String) ?? "<no surface>"
     }
 
     /// One-line state summary for scripted verification and bug reports.

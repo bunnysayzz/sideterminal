@@ -94,6 +94,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             ("com.sideterminal.control.settings", #selector(openSettings)),
             ("com.sideterminal.control.restart", #selector(restartSession)),
             ("com.sideterminal.control.status", #selector(dumpStatus)),
+            ("com.sideterminal.control.dumptext", #selector(dumpScreenText)),
+            ("com.sideterminal.control.newsession", #selector(newSessionFromControl)),
         ]
         for (name, selector) in commands {
             center.addObserver(self, selector: selector, name: .init(name), object: nil)
@@ -115,6 +117,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
                 self?.applyScriptedSetting(key: key, value: value)
             }
         }
+
+        installTestChannel(center)
     }
 
     private func applyScriptedSetting(key: String, value: String) {
@@ -136,6 +140,30 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         default:
             Self.logger.warning("unknown scripted setting \(key, privacy: .public)")
         }
+    }
+
+    /// Scripted-test hooks: type text / press keys / read the screen.
+    private func installTestChannel(_ center: DistributedNotificationCenter) {
+        center.addObserver(forName: .init("com.sideterminal.control.type"), object: nil, queue: .main) { [weak self] note in
+            guard let text = note.object as? String else { return }
+            MainActor.assumeIsolated { self?.sidebar.typeText(text) }
+        }
+        center.addObserver(forName: .init("com.sideterminal.control.key"), object: nil, queue: .main) { [weak self] note in
+            guard let name = note.object as? String else { return }
+            MainActor.assumeIsolated { self?.sidebar.sendKey(name) }
+        }
+    }
+
+    @objc func dumpScreenText() {
+        try? sidebar.screenText().write(
+            toFile: NSTemporaryDirectory() + "/sideterminal-screen.txt",
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
+    @objc func newSessionFromControl() {
+        sidebar.newSession()
     }
 
     /// Diagnostic snapshot used by scripted verification.

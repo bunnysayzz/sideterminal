@@ -9,10 +9,32 @@ final class SidebarPanel: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }
 
+    /// AppKit turns an unhandled Esc into `cancelOperation:`, which on a panel
+    /// tries to "cancel" (close) it — swallowing Esc before TUIs like vim or
+    /// Claude Code can see it. Route it back into the terminal as a real Esc.
+    override func cancelOperation(_ sender: Any?) {
+        guard let responder = firstResponder,
+              responder.responds(to: #selector(NSResponder.keyDown(with:))) else { return }
+        if let esc = NSEvent.keyEvent(
+            with: .keyDown, location: .zero, modifierFlags: [],
+            timestamp: ProcessInfo.processInfo.systemUptime,
+            windowNumber: windowNumber, context: nil,
+            characters: "\u{1b}", charactersIgnoringModifiers: "\u{1b}",
+            isARepeat: false, keyCode: 53
+        ) {
+            responder.keyDown(with: esc)
+        }
+    }
+
     init() {
+        // NOT .nonactivatingPanel: the sidebar is something you reveal in
+        // order to type in it, so it must be able to become the real key
+        // window (focus lands on the terminal immediately, Esc and all keys
+        // reach it). A non-activating panel could only be "key within the
+        // app," which left focus on your previous app until you clicked.
         super.init(
             contentRect: .zero,
-            styleMask: [.borderless, .nonactivatingPanel],
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
