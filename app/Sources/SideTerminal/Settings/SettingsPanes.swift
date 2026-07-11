@@ -412,13 +412,18 @@ struct AdvancedPane: View {
 // MARK: About
 
 struct AboutPane: View {
-    private static let repoURL = URL(string: "https://github.com/bunnysayzz/sideterminal")!
+    private static let repo = "https://github.com/bunnysayzz/sideterminal"
+    private static let repoURL = URL(string: repo)!
+    private static let releasesURL = URL(string: repo + "/releases")!
+    private static let issuesURL = URL(string: repo + "/issues")!
+    private static let licenseURL = URL(string: repo + "/blob/main/LICENSE")!
 
     @State private var hoveringGitHub = false
 
-    private var version: String {
+    private var versionString: String {
         let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
-        return "v\(short)"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+        return "\(short) (\(build))"
     }
 
     private var gitHubMark: NSImage? {
@@ -427,124 +432,116 @@ struct AboutPane: View {
     }
 
     var body: some View {
-        ZStack {
-            // A soft glow rising from behind the icon gives the pane depth
-            // without stealing attention.
-            RadialGradient(
-                colors: [Color.accentColor.opacity(0.16), .clear],
-                center: UnitPoint(x: 0.5, y: 0.16),
-                startRadius: 12,
-                endRadius: 320
-            )
+        Form {
+            // Centered hero: icon, name + version, tagline, primary action.
+            Section {
+                VStack(spacing: 0) {
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .frame(width: 96, height: 96)
+                        .shadow(color: .black.opacity(0.22), radius: 12, y: 6)
 
-            VStack(spacing: 0) {
-                Spacer(minLength: 30)
-
-                Image(nsImage: NSApp.applicationIconImage)
-                    .resizable()
-                    .frame(width: 118, height: 118)
-                    .shadow(color: .black.opacity(0.28), radius: 18, y: 9)
-
-                HStack(spacing: 10) {
                     Text("SideTerminal")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                    Text(version)
-                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .font(.system(size: 25, weight: .semibold, design: .rounded))
+                        .padding(.top, 12)
+
+                    Text("Version \(versionString)")
+                        .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(.secondary)
-                        .padding(.vertical, 3)
-                        .padding(.horizontal, 8)
-                        .background(Capsule().fill(Color(nsColor: .quaternarySystemFill)))
-                        .overlay(Capsule().strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1))
-                        .offset(y: 2)
+                        .padding(.top, 3)
+
+                    Text("Your terminal, one edge away.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 8)
+
+                    gitHubButton
+                        .padding(.top, 18)
                 }
-                .padding(.top, 16)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .listRowBackground(Color.clear)
+            }
 
-                Text("Your terminal, one edge away.")
-                    .font(.system(size: 13.5))
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 6)
-
-                HStack(spacing: 8) {
-                    chip("bolt.fill", "Instant reveal", .yellow)
-                    chip("infinity", "Sessions live on", .purple)
-                    chip("sparkles", "Native glass", .teal)
-                }
-                .padding(.top, 18)
-
-                Button {
-                    NSWorkspace.shared.open(Self.repoURL)
+            // Standard info + links, in the same grouped style as other panes.
+            Section {
+                LabeledContent {
+                    Text(versionString).foregroundStyle(.secondary).monospacedDigit()
                 } label: {
-                    HStack(spacing: 8) {
-                        if let gitHubMark {
-                            Image(nsImage: gitHubMark)
-                                .renderingMode(.template)
-                                .resizable()
-                                .frame(width: 16, height: 16)
+                    IconLabel(title: "Version", symbol: "number", color: .gray)
+                }
+                Button { NSWorkspace.shared.open(Self.licenseURL) } label: {
+                    LabeledContent {
+                        HStack(spacing: 5) {
+                            Text("MIT").foregroundStyle(.secondary)
+                            Image(systemName: "arrow.up.forward.square").font(.caption).foregroundStyle(.tertiary)
                         }
-                        Text("View on GitHub")
-                            .font(.system(size: 13, weight: .semibold))
-                        Image(systemName: "arrow.up.right")
-                            .font(.system(size: 10, weight: .bold))
-                            .opacity(0.7)
+                    } label: {
+                        IconLabel(title: "License", symbol: "checkmark.seal", color: .green)
                     }
-                    .foregroundStyle(.white)
-                    .padding(.vertical, 9)
-                    .padding(.horizontal, 20)
-                    .background(
-                        Capsule().fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(nsColor: .controlAccentColor),
-                                    Color(nsColor: .controlAccentColor).opacity(0.78),
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                    )
-                    .shadow(
-                        color: Color(nsColor: .controlAccentColor)
-                            .opacity(hoveringGitHub ? 0.45 : 0.28),
-                        radius: hoveringGitHub ? 12 : 8,
-                        y: 4
-                    )
-                    .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
-                .scaleEffect(hoveringGitHub ? 1.035 : 1)
-                .animation(.spring(response: 0.28, dampingFraction: 0.7), value: hoveringGitHub)
-                .onHover { hoveringGitHub = $0 }
-                .help("bunnysayzz/sideterminal")
-                .padding(.top, 22)
+            }
 
+            Section {
+                linkRow("Source Code", detail: "bunnysayzz/sideterminal", symbol: "chevron.left.forwardslash.chevron.right", color: .indigo, url: Self.repoURL)
+                linkRow("Releases", detail: "Download builds", symbol: "shippingbox", color: .orange, url: Self.releasesURL)
+                linkRow("Report an Issue", detail: "GitHub Issues", symbol: "exclamationmark.bubble", color: .pink, url: Self.issuesURL)
+            } footer: {
                 HStack(spacing: 4.5) {
-                    Text("Open source, crafted with")
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 9.5))
-                        .foregroundStyle(.red)
+                    Text("© 2026 bunnysayzz · Open source, made with")
+                    Image(systemName: "heart.fill").font(.system(size: 9)).foregroundStyle(.red)
                     Text("for the Mac")
                 }
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
-                .padding(.top, 16)
-
-                Spacer(minLength: 28)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 6)
             }
         }
+        .formStyle(.grouped)
     }
 
-    private func chip(_ symbol: String, _ label: String, _ tint: Color) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: symbol)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(tint)
-            Text(label)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
+    private func linkRow(_ title: String, detail: String, symbol: String, color: Color, url: URL) -> some View {
+        Button { NSWorkspace.shared.open(url) } label: {
+            LabeledContent {
+                HStack(spacing: 5) {
+                    Text(detail).foregroundStyle(.secondary)
+                    Image(systemName: "arrow.up.forward.square").font(.caption).foregroundStyle(.tertiary)
+                }
+            } label: {
+                IconLabel(title: title, symbol: symbol, color: color)
+            }
         }
-        .padding(.vertical, 5)
-        .padding(.horizontal, 11)
-        .background(Capsule().fill(Color(nsColor: .quaternarySystemFill)))
-        .overlay(Capsule().strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1))
+        .buttonStyle(.plain)
+    }
+
+    private var gitHubButton: some View {
+        Button {
+            NSWorkspace.shared.open(Self.repoURL)
+        } label: {
+            HStack(spacing: 8) {
+                if let gitHubMark {
+                    Image(nsImage: gitHubMark)
+                        .renderingMode(.template)
+                        .resizable()
+                        .frame(width: 15, height: 15)
+                }
+                Text("View on GitHub")
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .foregroundStyle(.white)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 18)
+            .background(Capsule().fill(Color(nsColor: .controlAccentColor)))
+            .shadow(color: Color(nsColor: .controlAccentColor).opacity(hoveringGitHub ? 0.4 : 0.22),
+                    radius: hoveringGitHub ? 10 : 6, y: 3)
+            .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .scaleEffect(hoveringGitHub ? 1.03 : 1)
+        .animation(.spring(response: 0.28, dampingFraction: 0.72), value: hoveringGitHub)
+        .onHover { hoveringGitHub = $0 }
+        .help("bunnysayzz/sideterminal")
     }
 }
