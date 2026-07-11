@@ -421,9 +421,7 @@ struct AboutPane: View {
     @State private var hoveringGitHub = false
 
     private var versionString: String {
-        let short = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
-        return "\(short) (\(build))"
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
     }
 
     private var gitHubMark: NSImage? {
@@ -438,65 +436,46 @@ struct AboutPane: View {
                 VStack(spacing: 0) {
                     Image(nsImage: NSApp.applicationIconImage)
                         .resizable()
-                        .frame(width: 96, height: 96)
-                        .shadow(color: .black.opacity(0.22), radius: 12, y: 6)
+                        .frame(width: 80, height: 80)
+                        .shadow(color: .black.opacity(0.22), radius: 10, y: 5)
 
                     Text("SideTerminal")
-                        .font(.system(size: 25, weight: .semibold, design: .rounded))
-                        .padding(.top, 12)
+                        .font(.system(size: 23, weight: .semibold, design: .rounded))
+                        .padding(.top, 10)
 
                     Text("Version \(versionString)")
-                        .font(.system(size: 12, design: .monospaced))
+                        .font(.system(size: 11.5, design: .monospaced))
                         .foregroundStyle(.secondary)
-                        .padding(.top, 3)
+                        .padding(.top, 2)
 
                     Text("Your terminal, one edge away.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                        .padding(.top, 8)
+                        .padding(.top, 7)
 
                     gitHubButton
-                        .padding(.top, 18)
+                        .padding(.top, 15)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 8)
                 .listRowBackground(Color.clear)
             }
 
-            // Standard info + links, in the same grouped style as other panes.
+            // Compact info + one link, matching the other panes' grouped style.
             Section {
                 LabeledContent {
                     Text(versionString).foregroundStyle(.secondary).monospacedDigit()
                 } label: {
                     IconLabel(title: "Version", symbol: "number", color: .gray)
                 }
-                Button { NSWorkspace.shared.open(Self.licenseURL) } label: {
-                    LabeledContent {
-                        HStack(spacing: 5) {
-                            Text("MIT").foregroundStyle(.secondary)
-                            Image(systemName: "arrow.up.forward.square").font(.caption).foregroundStyle(.tertiary)
-                        }
-                    } label: {
-                        IconLabel(title: "License", symbol: "checkmark.seal", color: .green)
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-
-            Section {
-                linkRow("Source Code", detail: "bunnysayzz/sideterminal", symbol: "chevron.left.forwardslash.chevron.right", color: .indigo, url: Self.repoURL)
-                linkRow("Releases", detail: "Download builds", symbol: "shippingbox", color: .orange, url: Self.releasesURL)
-                linkRow("Report an Issue", detail: "GitHub Issues", symbol: "exclamationmark.bubble", color: .pink, url: Self.issuesURL)
+                linkRow("License", detail: "MIT", symbol: "checkmark.seal", color: .green, url: Self.licenseURL)
+                linkRow("Report an Issue", detail: "GitHub", symbol: "exclamationmark.bubble", color: .pink, url: Self.issuesURL)
             } footer: {
-                HStack(spacing: 4.5) {
-                    Text("© 2026 bunnysayzz · Open source, made with")
-                    Image(systemName: "heart.fill").font(.system(size: 9)).foregroundStyle(.red)
-                    Text("for the Mac")
-                }
-                .font(.footnote)
-                .foregroundStyle(.tertiary)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 6)
+                Text("Open source · MIT License")
+                    .font(.footnote)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
             }
         }
         .formStyle(.grouped)
