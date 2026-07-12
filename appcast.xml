@@ -1,22 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  Sparkle update feed for SideTerminal.
-
-  Consumed by the app itself (SUFeedURL in Info.plist, set in
-  scripts/bundle-app.sh) via raw.githubusercontent.com — no extra hosting
-  needed. New <item> entries are appended by scripts/release.sh on every
-  release: it runs Sparkle's `sign_update` on the built DMG and inserts the
-  resulting EdDSA signature here, then commits + pushes this file.
-
-  Releases published before Sparkle was integrated intentionally have no
-  entry here — they were never signed with the update key, and Sparkle
-  requires a valid signature before it will offer an update.
--->
-<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
   <channel>
     <title>SideTerminal</title>
     <link>https://raw.githubusercontent.com/bunnysayzz/sideterminal/main/appcast.xml</link>
     <description>Update feed for SideTerminal, a native edge-reveal sidebar terminal for macOS.</description>
     <language>en</language>
-  </channel>
+  <item><title>Version 1.0.2</title><pubDate>Sun, 12 Jul 2026 11:32:26 +0000</pubDate><sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion><enclosure url="https://github.com/bunnysayzz/sideterminal/releases/download/v1.0.2/SideTerminal.dmg" type="application/octet-stream" sparkle:version="202607121701" sparkle:shortVersionString="1.0.2" sparkle:edSignature="5M59euauHgaeUtGO1J2Ytbhd1+r1uAXREr4O5LrG9DKp4/MDcau6PAOfpvZ009bh1Xf644iKd8qDSRRzzsWmBg==" length="10010681" /></item></channel>
 </rss>
