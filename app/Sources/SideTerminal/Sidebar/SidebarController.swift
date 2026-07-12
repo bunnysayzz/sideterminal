@@ -468,11 +468,14 @@ final class SidebarController: NSObject {
 
         state = .revealing
         UserDefaults.standard.set(true, forKey: "internal.wasVisible")
-        // Activate so the panel becomes the real OS key window: without this,
-        // a non-activating panel is only "key within our app," so keyboard
-        // focus stays on whatever app you were in — you'd have to click once
-        // to type, and special keys (Esc) wouldn't reach the terminal.
-        NSApp.activate(ignoringOtherApps: true)
+        // Deliberately no NSApp.activate(ignoringOtherApps:) here: while a
+        // *different* app owns a fullscreen Space, activating our app would
+        // force macOS to switch away from that Space back to the desktop —
+        // exactly the "sidebar only shows up on the desktop" bug. The panel
+        // is a .nonactivatingPanel, so makeKeyAndOrderFront alone is enough
+        // to make it the real key window and receive every keystroke,
+        // without moving the user out of whatever Space (fullscreen or not)
+        // they're currently on.
         panel.makeKeyAndOrderFront(nil)
         panel.orderFrontRegardless()
         applyGlass()

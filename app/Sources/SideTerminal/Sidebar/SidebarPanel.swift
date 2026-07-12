@@ -27,14 +27,20 @@ final class SidebarPanel: NSPanel {
     }
 
     init() {
-        // NOT .nonactivatingPanel: the sidebar is something you reveal in
-        // order to type in it, so it must be able to become the real key
-        // window (focus lands on the terminal immediately, Esc and all keys
-        // reach it). A non-activating panel could only be "key within the
-        // app," which left focus on your previous app until you clicked.
+        // .nonactivatingPanel is required for the sidebar to appear over a
+        // fullscreen app: calling NSApp.activate() while another app owns a
+        // fullscreen Space forces macOS to switch back to the desktop Space
+        // instead of overlaying our panel on it. A non-activating panel can
+        // still become the real key window and receive every keystroke
+        // (Esc included) without that app-wide activation step — that's
+        // its whole purpose, and combined with .canJoinAllSpaces +
+        // .fullScreenAuxiliary below it lets the panel join the fullscreen
+        // Space directly. `focusTerminal()` already compensates for the one
+        // side effect (no window-key notification) by calling
+        // ghostty_surface_set_focus explicitly.
         super.init(
             contentRect: .zero,
-            styleMask: [.borderless],
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
@@ -52,6 +58,9 @@ final class SidebarPanel: NSPanel {
         isReleasedWhenClosed = false
         animationBehavior = .none
 
+        // .canJoinAllSpaces + .fullScreenAuxiliary is the documented recipe
+        // for a panel that overlays a fullscreen app's Space instead of
+        // being confined to the desktop Space.
         collectionBehavior = [
             .canJoinAllSpaces,
             .fullScreenAuxiliary,
