@@ -1,0 +1,32 @@
+# CodeRabbit config — free AI PR reviews for public repos.
+# Install once at https://coderabbit.ai (Add to GitHub → pick this repo);
+# this file then tunes every review automatically. No key, no hosting.
+language: en-US
+reviews:
+  profile: chill            # concise, high-signal; not nitpicky
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+  # Review our own code only — never the vendored engine or build output.
+  path_filters:
+    - "!app/Sources/SideTerminal/Vendor/**"
+    - "!ghostty/**"
+    - "!build/**"
+    - "!**/.build/**"
+    - "!patches/**"
+  path_instructions:
+    - path: "app/Sources/SideTerminal/**"
+      instructions: >
+        Native macOS AppKit/SwiftUI app. Focus on retain cycles / leaks,
+        @MainActor and threading correctness, and UI work off the main thread.
+        Do not suggest rewriting or replacing the vendored terminal engine.
+    - path: "app/Core/**"
+      instructions: >
+        Pure, unit-tested logic. Flag correctness bugs and untested branches;
+        suggest a test when behavior changes.
+chat:
+  auto_reply: true
