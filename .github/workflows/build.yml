@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Cache Zig toolchain
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: tools/zig-aarch64-macos-0.15.2
           key: zig-0.15.2-${{ runner.os }}-${{ runner.arch }}
