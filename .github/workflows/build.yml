@@ -18,7 +18,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run SideTerminalCore tests
         working-directory: app/Core
         run: swift test
@@ -31,7 +31,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Cache Zig toolchain
         uses: actions/cache@v4
