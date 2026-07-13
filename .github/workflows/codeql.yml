@@ -3,7 +3,7 @@ name: CodeQL
 # GitHub's native security/quality scanning (free for public repos).
 # Scoped to the SideTerminalCore package, which builds on standard runners;
 # the full app needs the macOS 26 SDK that runners don't have yet.
-# Runs on Linux to stay within GitHub's free tier (macOS runners are paid).
+# Note: Swift analysis requires macOS runners per CodeQL docs.
 
 on:
   push:
@@ -20,15 +20,10 @@ permissions:
 jobs:
   analyze:
     name: Analyze (Swift)
-    runs-on: ubuntu-latest
+    runs-on: macos-15
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Swift (Linux)
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.0"
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3

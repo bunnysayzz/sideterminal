@@ -25,12 +25,12 @@ jobs:
 
       - name: Install SwiftLint
         run: |
-          curl -L -o swiftlint.tar.gz \
-            "https://github.com/realm/SwiftLint/releases/download/0.57.1/swiftlint_linux_amd64.tar.gz"
-          tar -xzf swiftlint.tar.gz
+          curl -L -o swiftlint.zip \
+            "https://github.com/realm/SwiftLint/releases/download/0.57.1/swiftlint_linux_amd64.zip"
+          unzip -o swiftlint.zip
           chmod +x swiftlint
           sudo mv swiftlint /usr/local/bin/swiftlint
-          rm -f swiftlint.tar.gz
+          rm -f swiftlint.zip
 
       - name: Install reviewdog
         uses: reviewdog/action-setup@v1
