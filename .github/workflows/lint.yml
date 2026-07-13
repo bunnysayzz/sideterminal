@@ -26,7 +26,7 @@ jobs:
       - name: Install SwiftLint
         run: |
           curl -L -o swiftlint.zip \
-            "https://github.com/realm/SwiftLint/releases/download/0.65.0/swiftlint_linux_amd64.zip"
+            "https://github.com/realm/SwiftLint/releases/download/0.57.1/swiftlint_linux_amd64.zip"
           unzip -o swiftlint.zip
           chmod +x swiftlint
           sudo mv swiftlint /usr/local/bin/swiftlint
