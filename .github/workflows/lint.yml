@@ -2,6 +2,7 @@ name: Lint
 
 # SwiftLint results posted inline on pull requests via reviewdog. Advisory
 # only — warnings are surfaced as review comments, they don't block merging.
+# Runs on Linux to stay within GitHub's free tier (macOS runners are paid).
 
 on:
   pull_request:
@@ -17,13 +18,19 @@ permissions:
 jobs:
   swiftlint:
     name: SwiftLint (reviewdog)
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
       - name: Install SwiftLint
-        run: brew install swiftlint
+        run: |
+          curl -L -o swiftlint.tar.gz \
+            "https://github.com/realm/SwiftLint/releases/download/0.57.1/swiftlint_linux_amd64.tar.gz"
+          tar -xzf swiftlint.tar.gz
+          chmod +x swiftlint
+          sudo mv swiftlint /usr/local/bin/swiftlint
+          rm -f swiftlint.tar.gz
 
       - name: Install reviewdog
         uses: reviewdog/action-setup@v1
